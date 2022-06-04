@@ -3,14 +3,9 @@ package de.leowandersleb.lib_bip_schnorr_kotlin
 import java.math.BigInteger
 import java.security.MessageDigest
 
-/**
- * @author michaeltan
- */
 object Schnorr {
-    private val p =
-        BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16)
-    private val n =
-        BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16)
+    private val p = BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16)
+    private val n = BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16)
     private val G = arrayOf(
         BigInteger("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16),
         BigInteger("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16)
@@ -111,11 +106,11 @@ object Schnorr {
         return finalData
     }
 
-    fun schnorrVerify(msg: ByteArray, pubkey: ByteArray, sig: ByteArray): Boolean {
+    fun schnorrVerify(msg: ByteArray, pubKey: ByteArray, sig: ByteArray): Boolean {
         if (msg.size != 32) throw RuntimeException("The message must be a 32-byte array.")
-        if (pubkey.size != 33) throw RuntimeException("The public key must be a 33-byte array.")
+        if (pubKey.size != 33) throw RuntimeException("The public key must be a 33-byte array.")
         if (sig.size != 64) throw RuntimeException("The signature must be a 64-byte array.")
-        val P = pointFromBytes(pubkey) ?: return false
+        val P = pointFromBytes(pubKey) ?: return false
         val r = toBigInteger(sig, 0, 32)
         val s = toBigInteger(sig, 32, 32)
         return if (r >= p || s >= n) false else {
@@ -162,6 +157,6 @@ object Schnorr {
         return String(hexChars)
     }
 
-    private fun sha256(input: ByteArray?): ByteArray =
+    fun sha256(input: ByteArray?): ByteArray =
         MessageDigest.getInstance("SHA-256").digest(input)
 }

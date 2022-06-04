@@ -1,6 +1,5 @@
 package de.leowandersleb.lib_bip_schnorr_kotlin
 
-import org.junit.Assert
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -14,8 +13,8 @@ import java.math.BigInteger
 internal class SchnorrTest {
     data class TV(
         val id: Int,
-        val seckey: ByteArray?,
-        val pubkey: ByteArray,
+        val secKey: ByteArray?,
+        val pubKey: ByteArray,
         val msg: ByteArray,
         val sig: ByteArray,
         val result: Boolean,
@@ -28,18 +27,17 @@ internal class SchnorrTest {
     @Test
     fun testAllVectors() {
         println("Test ${tv.id} ...")
-        if (null != tv.seckey) {
-            val secKeyNum = BigInteger(Schnorr.bytesToHex(tv.seckey!!), 16)
+        if (null != tv.secKey) {
+            val secKeyNum = BigInteger(Schnorr.bytesToHex(tv.secKey!!), 16)
             val sigActual = Schnorr.schnorrSign(tv.msg, secKeyNum)
             assertArrayEquals("Failed signing test ${tv.id} (${tv.comment})", tv.sig, sigActual)
         }
-        val resultActual = Schnorr.schnorrVerify(tv.msg, tv.pubkey, tv.sig)
+        val resultActual = Schnorr.schnorrVerify(tv.msg, tv.pubKey, tv.sig)
         assertEquals("Failed verification test ${tv.id} (${tv.comment})", tv.result, resultActual)
     }
 
     companion object {
-        @JvmStatic
-        @Parameters
+        @JvmStatic @Parameters
         fun testVectors() =
             """1,0000000000000000000000000000000000000000000000000000000000000001,0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798,0000000000000000000000000000000000000000000000000000000000000000,787A848E71043D280C50470E8E1532B2DD5D20EE912A45DBDD2BD1DFBF187EF67031A98831859DC34DFFEEDDA86831842CCD0079E1F92AF177F7F22CC1DCED05,TRUE,
 2,B7E151628AED2A6ABF7158809CF4F3C762E7160F38B4DA56A784D9045190CFEF,02DFF1D77F2A671C5F36183726DB2341BE58FEAE1DA2DECED843240F7B502BA659,243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89,2A298DACAE57395A15D0795DDBFD1DCB564DA82B0F269BC70A74F8220429BA1D1E51A22CCEC35599B8F266912281F8365FFC2D035A230434A1A64DC59F7013FD,TRUE,
