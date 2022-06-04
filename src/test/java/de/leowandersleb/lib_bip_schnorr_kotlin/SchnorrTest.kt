@@ -8,9 +8,10 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import java.math.BigInteger
+import java.util.*
 
 @RunWith(Parameterized::class)
-internal class SchnorrTest {
+internal class SchnorrSigTest {
     data class TV(
         val id: Int,
         val secKey: ByteArray?,
@@ -28,11 +29,15 @@ internal class SchnorrTest {
     fun testAllVectors() {
         println("Test ${tv.id} ...")
         if (null != tv.secKey) {
+            // test getPubKey
+            val pubKeyActual = Schnorr.getPubKey(tv.secKey!!)
+            assertEquals("Failed reproducing the pubKey", Schnorr.bytesToHex(tv.pubKey), Schnorr.bytesToHex(pubKeyActual))
+            // test sign
             val secKeyNum = BigInteger(Schnorr.bytesToHex(tv.secKey!!), 16)
-            val sigActual = Schnorr.schnorrSign(tv.msg, secKeyNum)
+            val sigActual = Schnorr.sign(tv.msg, secKeyNum)
             assertArrayEquals("Failed signing test ${tv.id} (${tv.comment})", tv.sig, sigActual)
         }
-        val resultActual = Schnorr.schnorrVerify(tv.msg, tv.pubKey, tv.sig)
+        val resultActual = Schnorr.verify(tv.msg, tv.pubKey, tv.sig)
         assertEquals("Failed verification test ${tv.id} (${tv.comment})", tv.result, resultActual)
     }
 
@@ -68,5 +73,32 @@ internal class SchnorrTest {
                         parts[6].replace("\"","")
                     )
                 }
+    }
+}
+
+internal class SchnorrKeysTest {
+    @Test
+    fun testKeyPair() {
+        val secKey = "dca4f4bf2883e4502200d7831ad891ace8c895709e9f09c9f9692632ae36c482".uppercase(Locale.US)
+        val pubKey = "ce16d1d2fabca7184d1502c147d5e029e88e63f8ff31ebfe3dbc9677819061cf".uppercase(Locale.US)
+        testKeys(secKey, pubKey)
+    }
+
+    @Test
+    fun testSecKey() {
+        (0..100000).forEach {
+            val secKey = Schnorr.getPrivateKey()
+            val secKeyHex = Schnorr.bytesToHex(secKey)
+            val pubKey = Schnorr.getPubKey(secKey)
+            val pubKeyHex = Schnorr.bytesToHex(pubKey)
+            testKeys(secKeyHex, pubKeyHex)
+        }
+    }
+
+    fun testKeys(secKeyHex: String, pubKeyHex: String) {
+        val secKeyBytes = Schnorr.hexStringToByteArray(secKeyHex)
+        val pubKeyResult = Schnorr.getPubKey(secKeyBytes)
+        val pubKeyResultHex = Schnorr.bytesToHex(pubKeyResult)
+        assertEquals(pubKeyHex, pubKeyResultHex)
     }
 }

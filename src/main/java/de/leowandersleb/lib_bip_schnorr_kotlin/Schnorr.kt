@@ -1,7 +1,13 @@
 package de.leowandersleb.lib_bip_schnorr_kotlin
 
+import org.spongycastle.jce.ECNamedCurveTable
 import java.math.BigInteger
+import java.security.KeyFactory
 import java.security.MessageDigest
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
+import java.security.spec.ECPublicKeySpec
+import kotlin.random.Random
 
 object Schnorr {
     private val p = BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16)
@@ -82,7 +88,7 @@ object Schnorr {
         return res
     }
 
-    fun schnorrSign(msg: ByteArray, seckey: BigInteger): ByteArray {
+    fun sign(msg: ByteArray, seckey: BigInteger): ByteArray {
         if (msg.size != 32) throw RuntimeException("The message must be a 32-byte array.")
         if ((BigInteger.ZERO > seckey) || (seckey > n.subtract(BigInteger.ONE)))
             throw RuntimeException("The secret key must be an integer in the range 1..n-1.")
@@ -106,7 +112,7 @@ object Schnorr {
         return finalData
     }
 
-    fun schnorrVerify(msg: ByteArray, pubKey: ByteArray, sig: ByteArray): Boolean {
+    fun verify(msg: ByteArray, pubKey: ByteArray, sig: ByteArray): Boolean {
         if (msg.size != 32) throw RuntimeException("The message must be a 32-byte array.")
         if (pubKey.size != 33) throw RuntimeException("The public key must be a 33-byte array.")
         if (sig.size != 64) throw RuntimeException("The signature must be a 64-byte array.")
@@ -155,6 +161,14 @@ object Schnorr {
             i++
         }
         return String(hexChars)
+    }
+
+    fun getPrivateKey() = Random.Default.nextBytes(32)
+
+    fun getPubKey(pk: ByteArray): ByteArray {
+        val spec = ECNamedCurveTable.getParameterSpec("secp256k1")
+        val pointQ = spec.g.multiply(BigInteger(1, pk))
+        return pointQ.getEncoded(false).copyOfRange(1, 33)
     }
 
     fun sha256(input: ByteArray?): ByteArray =

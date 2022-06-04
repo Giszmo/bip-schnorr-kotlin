@@ -10,4 +10,6 @@ java {
 
 dependencies {
     implementation 'junit:junit:4.13.2'
+    implementation 'com.madgag.spongycastle:core:1.51.0.0'
+    implementation 'com.madgag.spongycastle:prov:1.51.0.0'
 }
