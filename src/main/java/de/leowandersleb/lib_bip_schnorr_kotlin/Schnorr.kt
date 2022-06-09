@@ -1,6 +1,7 @@
 package de.leowandersleb.lib_bip_schnorr_kotlin
 
 import org.spongycastle.jce.ECNamedCurveTable
+import org.spongycastle.util.encoders.Hex
 import java.math.BigInteger
 import java.security.KeyFactory
 import java.security.MessageDigest
@@ -72,7 +73,7 @@ object Schnorr {
             for (i in 0 until 64 - hexNum.length) sb.append("0")
             hexNum = sb.append(hexNum).toString()
         }
-        return hexStringToByteArray(hexNum)
+        return Hex.decode(hexNum)
     }
 
     private fun toBigInteger(data: ByteArray, startPos: Int, len: Int) =
@@ -114,8 +115,17 @@ object Schnorr {
 
     fun verify(msg: ByteArray, pubKey: ByteArray, sig: ByteArray): Boolean {
         if (msg.size != 32) throw RuntimeException("The message must be a 32-byte array.")
-        if (pubKey.size != 33) throw RuntimeException("The public key must be a 33-byte array.")
         if (sig.size != 64) throw RuntimeException("The signature must be a 64-byte array.")
+        return when (pubKey.size) {
+            33 -> internalVerify(msg, arrayOf(2.toByte()).toByteArray() + pubKey, sig)
+            32 -> internalVerify(msg, arrayOf(2.toByte()).toByteArray() + pubKey, sig)
+                || internalVerify(msg, arrayOf(2.toByte()).toByteArray() + pubKey, sig)
+            else -> throw RuntimeException("The public key must be a 32 or 33-byte array.")
+        }
+    }
+
+    // TODO: This is expenesive! How can we speed this up?
+    private fun internalVerify(msg: ByteArray, pubKey: ByteArray, sig: ByteArray): Boolean {
         val P = pointFromBytes(pubKey) ?: return false
         val r = toBigInteger(sig, 0, 32)
         val s = toBigInteger(sig, 32, 32)

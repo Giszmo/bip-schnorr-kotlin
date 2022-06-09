@@ -9,7 +9,15 @@ java {
 }
 
 dependencies {
-    implementation 'junit:junit:4.13.2'
     implementation 'com.madgag.spongycastle:core:1.51.0.0'
     implementation 'com.madgag.spongycastle:prov:1.51.0.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
